@@ -121,7 +121,7 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 function fmtMontant(n) {
-  return new Intl.NumberFormat("fr-FR").format(n);
+  return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n);
 }
 
 // ---------- Petits composants d'UI ----------
@@ -545,9 +545,9 @@ function VueFinances({ token, finances, setFinances }) {
     <div className="space-y-8">
       {erreur && <p className="text-sm text-[#0B3BA6]">{erreur}</p>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <StatBlock label="Total des entrées" value={`${fmtMontant(totalEntrees)} $`} />
-        <StatBlock label="Total des dépenses" value={`${fmtMontant(totalDepenses)} $`} />
-        <StatBlock label="Solde" value={`${solde >= 0 ? "+" : ""}${fmtMontant(solde)} $`} />
+        <StatBlock label="Total des entrées" value={`${fmtMontant(totalEntrees)} FCFA`} />
+        <StatBlock label="Total des dépenses" value={`${fmtMontant(totalDepenses)} FCFA`} />
+        <StatBlock label="Solde" value={`${solde >= 0 ? "+" : ""}${fmtMontant(solde)} FCFA`} />
       </div>
 
       <Card className="p-6">
@@ -566,7 +566,7 @@ function VueFinances({ token, finances, setFinances }) {
             <SelectField label="Catégorie" value={categorie} onChange={(e) => setCategorie(e.target.value)}>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </SelectField>
-            <TextField label="Montant ($)" type="number" min="0" step="0.01" value={montant} onChange={(e) => setMontant(e.target.value)} placeholder="0.00" />
+            <TextField label="Montant (FCFA)" type="number" min="0" step="1" value={montant} onChange={(e) => setMontant(e.target.value)} placeholder="0" />
           </div>
           <TextField label="Description (facultatif)" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex : Câbles sono, projet toiture..." />
           <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
@@ -588,7 +588,7 @@ function VueFinances({ token, finances, setFinances }) {
                   <div className="text-xs text-[#64769A] mt-0.5">{new Date(f.date).toLocaleDateString("fr-FR")}</div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className={`text-sm font-medium ${f.type === "entree" ? "text-[#0B3BA6]" : "text-[#D81B1B]"}`}>{f.type === "entree" ? "+" : "-"}{fmtMontant(f.montant)} $</span>
+                  <span className={`text-sm font-medium ${f.type === "entree" ? "text-[#0B3BA6]" : "text-[#D81B1B]"}`}>{f.type === "entree" ? "+" : "-"}{fmtMontant(f.montant)} FCFA</span>
                   <button onClick={() => supprimerMouvement(f.id)} className="text-[#64769A] hover:text-[#0B3BA6] transition"><Trash2 size={16} /></button>
                 </div>
               </div>
@@ -793,8 +793,8 @@ function VueEnsemble({ membres, presences, finances }) {
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatBlock label="Membres enregistrés" value={membres.length} />
       <StatBlock label="Dernier comptage" value={derniereTotal} sub={dernierePresence ? new Date(dernierePresence.date).toLocaleDateString("fr-FR") : "—"} />
-      <StatBlock label="Total entrées (cumulé)" value={`${fmtMontant(totalEntrees)} $`} />
-      <StatBlock label="Solde cumulé" value={`${fmtMontant(totalEntrees - totalDepenses)} $`} />
+      <StatBlock label="Total entrées (cumulé)" value={`${fmtMontant(totalEntrees)} FCFA`} />
+      <StatBlock label="Solde cumulé" value={`${fmtMontant(totalEntrees - totalDepenses)} FCFA`} />
     </div>
   );
 }
