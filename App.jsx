@@ -23,6 +23,7 @@ import {
   LogOut,
   Camera,
 } from "lucide-react";
+import logo from "./logo.jpg";
 
 // ---------- Connexion à Supabase ----------
 // Ces deux valeurs ne sont pas secrètes : elles sont faites pour être
@@ -125,15 +126,15 @@ function fmtMontant(n) {
 
 // ---------- Petits composants d'UI ----------
 function Card({ children, className = "" }) {
-  return <div className={`bg-[#FBF8F1] border border-[#D8CDB8] rounded-sm ${className}`}>{children}</div>;
+  return <div className={`bg-[#FFFFFF] border border-[#D3DDF0] rounded-sm ${className}`}>{children}</div>;
 }
 
 function StatBlock({ label, value, sub }) {
   return (
     <Card className="p-5">
-      <div className="text-[11px] tracking-wide text-[#7A6F5C] font-medium">{label}</div>
-      <div className="text-3xl font-serif text-[#241F1A] mt-1">{value}</div>
-      {sub && <div className="text-xs text-[#9C8F76] mt-1">{sub}</div>}
+      <div className="text-[11px] tracking-wide text-[#64769A] font-medium">{label}</div>
+      <div className="text-3xl font-serif text-[#0B1B45] mt-1">{value}</div>
+      {sub && <div className="text-xs text-[#64769A] mt-1">{sub}</div>}
     </Card>
   );
 }
@@ -141,10 +142,10 @@ function StatBlock({ label, value, sub }) {
 function TextField({ label, ...props }) {
   return (
     <label className="block text-sm">
-      <span className="text-[#5B5142] font-medium">{label}</span>
+      <span className="text-[#3A4A6E] font-medium">{label}</span>
       <input
         {...props}
-        className="mt-1 w-full border border-[#CFC3AA] bg-white rounded-sm px-3 py-2 text-[#241F1A] focus:outline-none focus:ring-2 focus:ring-[#7A3B2E] focus:border-transparent"
+        className="mt-1 w-full border border-[#BFCCE6] bg-white rounded-sm px-3 py-2 text-[#0B1B45] focus:outline-none focus:ring-2 focus:ring-[#0B3BA6] focus:border-transparent"
       />
     </label>
   );
@@ -153,10 +154,10 @@ function TextField({ label, ...props }) {
 function SelectField({ label, children, ...props }) {
   return (
     <label className="block text-sm">
-      <span className="text-[#5B5142] font-medium">{label}</span>
+      <span className="text-[#3A4A6E] font-medium">{label}</span>
       <select
         {...props}
-        className="mt-1 w-full border border-[#CFC3AA] bg-white rounded-sm px-3 py-2 text-[#241F1A] focus:outline-none focus:ring-2 focus:ring-[#7A3B2E] focus:border-transparent"
+        className="mt-1 w-full border border-[#BFCCE6] bg-white rounded-sm px-3 py-2 text-[#0B1B45] focus:outline-none focus:ring-2 focus:ring-[#0B3BA6] focus:border-transparent"
       >
         {children}
       </select>
@@ -167,7 +168,7 @@ function SelectField({ label, children, ...props }) {
 function CheckboxGroup({ label, options, selected, onToggle }) {
   return (
     <div>
-      <span className="text-sm text-[#5B5142] font-medium">{label}</span>
+      <span className="text-sm text-[#3A4A6E] font-medium">{label}</span>
       <div className="mt-2 flex flex-wrap gap-2">
         {options.map((opt) => {
           const active = selected.includes(opt);
@@ -177,7 +178,7 @@ function CheckboxGroup({ label, options, selected, onToggle }) {
               key={opt}
               onClick={() => onToggle(opt)}
               className={`text-xs px-3 py-1.5 rounded-full border transition ${
-                active ? "bg-[#7A3B2E] border-[#7A3B2E] text-[#FBF8F1]" : "bg-white border-[#CFC3AA] text-[#5B5142] hover:border-[#7A3B2E]"
+                active ? "bg-[#0B3BA6] border-[#0B3BA6] text-[#FFFFFF]" : "bg-white border-[#BFCCE6] text-[#3A4A6E] hover:border-[#0B3BA6]"
               }`}
             >
               {opt}
@@ -192,56 +193,60 @@ function CheckboxGroup({ label, options, selected, onToggle }) {
 // ---------- Page publique ----------
 function PagePublique({ siteInfo, horaires, annonces, onAccesResponsables }) {
   return (
-    <div className="min-h-screen bg-[#F3EEE1] text-[#241F1A]">
+    <div className="min-h-screen bg-[#F2F6FD] text-[#0B1B45]">
       <style>{`
         .app-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
-        .font-serif { font-family: Georgia, 'Times New Roman', serif; }
+        .font-serif { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }
       `}</style>
       <div className="app-sans">
-        <header className="max-w-4xl mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#7A3B2E] flex items-center justify-center text-[#FBF8F1]">
-              <BookOpen size={18} />
+        <header className="bg-[#FFFFFF] border-b-4 border-[#0B3BA6]">
+          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={logo} alt="Logo EEAD Temple Sion Dokparou" className="h-14 w-14 object-contain" />
+              <div className="font-serif text-lg leading-tight text-[#0B3BA6]">{EGLISE.nom}</div>
             </div>
-            <div className="font-serif text-lg leading-tight">{EGLISE.nom}</div>
+            <button
+              onClick={onAccesResponsables}
+              className="inline-flex items-center gap-2 text-sm border border-[#BFCCE6] px-4 py-2 rounded-sm text-[#3A4A6E] hover:border-[#0B3BA6] hover:text-[#0B3BA6] transition"
+            >
+              <Lock size={14} /> Espace responsables
+            </button>
           </div>
-          <button
-            onClick={onAccesResponsables}
-            className="inline-flex items-center gap-2 text-sm border border-[#CFC3AA] px-4 py-2 rounded-sm text-[#5B5142] hover:border-[#7A3B2E] hover:text-[#7A3B2E] transition"
-          >
-            <Lock size={14} /> Espace responsables
-          </button>
         </header>
 
-        <section className="max-w-4xl mx-auto px-6">
-          <div className="relative rounded-sm overflow-hidden border border-[#D8CDB8] bg-[#E7DEC9]" style={{ height: 320 }}>
+        <section className="max-w-4xl mx-auto px-6 pt-8">
+          <div className="relative rounded-sm overflow-hidden border border-[#D3DDF0] bg-[#E4EAF6]" style={{ height: 320 }}>
             {siteInfo.photo ? (
               <img src={siteInfo.photo} alt="Photo de l'église" className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-[#9C8F76] text-sm">
-                Aucune photo pour le moment
+              <div
+                className="w-full h-full flex flex-col items-center justify-center gap-4"
+                style={{ background: "linear-gradient(135deg, #082A7A 0%, #0B3BA6 55%, #1E6FE0 100%)" }}
+              >
+                <img src={logo} alt="" className="h-36 w-36 object-contain rounded-full bg-[#FFFFFF] p-2 shadow-lg" />
+                <div className="text-[#FFFFFF] text-sm tracking-wide">Bienvenue à {EGLISE.nom}</div>
               </div>
             )}
           </div>
 
           <div className="mt-8">
-            <h1 className="font-serif text-3xl">{EGLISE.temple}</h1>
-            <p className="mt-3 text-[#5B5142] leading-relaxed max-w-xl">{siteInfo.presentation}</p>
+            <h1 className="font-serif text-3xl text-[#0B3BA6]">{EGLISE.temple}</h1>
+            <p className="mt-3 text-[#3A4A6E] leading-relaxed max-w-xl">{siteInfo.presentation}</p>
           </div>
 
           <div className="mt-10 grid sm:grid-cols-2 gap-6">
             <Card className="p-6">
               <h2 className="font-serif text-lg mb-4 flex items-center gap-2">
-                <Clock size={17} className="text-[#7A3B2E]" /> Jours de culte
+                <Clock size={17} className="text-[#0B3BA6]" /> Jours de culte
               </h2>
               <div className="space-y-3">
                 {horaires.map((h) => (
                   <div key={h.id} className="flex items-baseline justify-between text-sm">
                     <div>
-                      <div className="font-medium text-[#241F1A]">{h.jour}</div>
-                      <div className="text-[#9C8F76]">{h.activite}</div>
+                      <div className="font-medium text-[#0B1B45]">{h.jour}</div>
+                      <div className="text-[#64769A]">{h.activite}</div>
                     </div>
-                    <div className="text-[#5B5142]">{h.heure}</div>
+                    <div className="text-[#3A4A6E]">{h.heure}</div>
                   </div>
                 ))}
               </div>
@@ -250,11 +255,11 @@ function PagePublique({ siteInfo, horaires, annonces, onAccesResponsables }) {
             <Card className="p-6">
               <h2 className="font-serif text-lg mb-4">Nous trouver</h2>
               <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-2 text-[#5B5142]">
-                  <MapPin size={16} className="text-[#7A3B2E]" /> {EGLISE.adresse}
+                <div className="flex items-center gap-2 text-[#3A4A6E]">
+                  <MapPin size={16} className="text-[#0B3BA6]" /> {EGLISE.adresse}
                 </div>
-                <div className="flex items-center gap-2 text-[#5B5142]">
-                  <Phone size={16} className="text-[#7A3B2E]" /> {EGLISE.telephone}
+                <div className="flex items-center gap-2 text-[#3A4A6E]">
+                  <Phone size={16} className="text-[#0B3BA6]" /> {EGLISE.telephone}
                 </div>
               </div>
             </Card>
@@ -270,11 +275,11 @@ function PagePublique({ siteInfo, horaires, annonces, onAccesResponsables }) {
                     <Card key={a.id} className="overflow-hidden">
                       {a.image && <img src={a.image} alt={a.titre} className="w-full h-40 object-cover" />}
                       <div className="p-5">
-                        <div className="text-xs text-[#9C8F76]">
+                        <div className="text-xs text-[#64769A]">
                           {new Date(a.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                         </div>
                         <h3 className="font-serif text-lg mt-1">{a.titre}</h3>
-                        <p className="text-sm text-[#5B5142] mt-2 leading-relaxed whitespace-pre-line">{a.texte}</p>
+                        <p className="text-sm text-[#3A4A6E] mt-2 leading-relaxed whitespace-pre-line">{a.texte}</p>
                       </div>
                     </Card>
                   ))}
@@ -283,7 +288,7 @@ function PagePublique({ siteInfo, horaires, annonces, onAccesResponsables }) {
           )}
         </section>
 
-        <footer className="max-w-4xl mx-auto px-6 py-10 mt-6 text-xs text-[#9C8F76]">
+        <footer className="max-w-4xl mx-auto px-6 py-10 mt-6 text-xs text-[#64769A]">
           {EGLISE.nom} — {EGLISE.temple}
         </footer>
       </div>
@@ -317,32 +322,30 @@ function PageConnexion({ onConnexion, onRetour }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3EEE1] flex items-center justify-center px-6">
+    <div className="min-h-screen bg-[#F2F6FD] flex items-center justify-center px-6">
       <div className="app-sans w-full max-w-sm">
-        <style>{`.font-serif { font-family: Georgia, 'Times New Roman', serif; }`}</style>
+        <style>{`.font-serif { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }`}</style>
         <Card className="p-8">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-9 h-9 rounded-full bg-[#7A3B2E] flex items-center justify-center text-[#FBF8F1]">
-              <Lock size={16} />
-            </div>
+            <img src={logo} alt="" className="h-12 w-12 object-contain" />
             <div>
               <div className="font-serif text-lg leading-tight">Espace responsables</div>
-              <div className="text-xs text-[#9C8F76]">Effectif & finances</div>
+              <div className="text-xs text-[#64769A]">Effectif & finances</div>
             </div>
           </div>
           <form onSubmit={valider} className="space-y-4">
             <TextField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="toi@exemple.com" autoFocus />
             <TextField label="Mot de passe" type="password" value={motDePasse} onChange={(e) => setMotDePasse(e.target.value)} placeholder="••••••••" />
-            {erreur && <p className="text-xs text-[#7A3B2E]">{erreur}</p>}
+            {erreur && <p className="text-xs text-[#0B3BA6]">{erreur}</p>}
             <button
               type="submit"
               disabled={enCours}
-              className="w-full bg-[#7A3B2E] text-[#FBF8F1] py-2.5 rounded-sm text-sm font-medium hover:bg-[#652E23] transition disabled:opacity-60"
+              className="w-full bg-[#0B3BA6] text-[#FFFFFF] py-2.5 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition disabled:opacity-60"
             >
               {enCours ? "Connexion..." : "Se connecter"}
             </button>
           </form>
-          <button onClick={onRetour} className="mt-4 text-xs text-[#9C8F76] hover:text-[#5B5142] transition">
+          <button onClick={onRetour} className="mt-4 text-xs text-[#64769A] hover:text-[#3A4A6E] transition">
             ← Retour au site
           </button>
         </Card>
@@ -409,7 +412,7 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
 
   return (
     <div className="space-y-8">
-      {erreur && <p className="text-sm text-[#7A3B2E]">{erreur}</p>}
+      {erreur && <p className="text-sm text-[#0B3BA6]">{erreur}</p>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatBlock label="Membres enregistrés" value={membres.length} />
         <StatBlock label="Dernier comptage dominical" value={derniereTotal} sub={dernierePresence ? new Date(dernierePresence.date).toLocaleDateString("fr-FR") : "—"} />
@@ -418,19 +421,19 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
 
       <div className="grid md:grid-cols-2 gap-6">
         <Card className="p-6">
-          <h3 className="font-serif text-lg text-[#241F1A] mb-4">Ajouter un membre</h3>
+          <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Ajouter un membre</h3>
           <form onSubmit={ajouterMembre} className="space-y-4">
             <TextField label="Nom complet" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex : Grace Mbala" />
             <CheckboxGroup label="Département d'appartenance" options={DEPARTEMENTS} selected={deps} onToggle={toggleDep} />
             <CheckboxGroup label="Département(s) ministériel(s)" options={MINISTERES} selected={mins} onToggle={toggleMin} />
-            <button type="submit" className="inline-flex items-center gap-2 bg-[#7A3B2E] text-[#FBF8F1] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#652E23] transition">
+            <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
               <Plus size={16} /> Ajouter le membre
             </button>
           </form>
         </Card>
 
         <Card className="p-6">
-          <h3 className="font-serif text-lg text-[#241F1A] mb-4">Comptage du dimanche</h3>
+          <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Comptage du dimanche</h3>
           <form onSubmit={ajouterPresence} className="space-y-4">
             <TextField label="Date du culte" type="date" value={dateP} onChange={(e) => setDateP(e.target.value)} />
             <div className="grid grid-cols-3 gap-3">
@@ -438,7 +441,7 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
               <TextField label="Femmes" type="number" min="0" value={femmes} onChange={(e) => setFemmes(e.target.value)} />
               <TextField label="Jeunes" type="number" min="0" value={jeunes} onChange={(e) => setJeunes(e.target.value)} />
             </div>
-            <button type="submit" className="inline-flex items-center gap-2 bg-[#7A3B2E] text-[#FBF8F1] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#652E23] transition">
+            <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
               <Plus size={16} /> Enregistrer le comptage
             </button>
           </form>
@@ -446,18 +449,18 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
       </div>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Registre des membres</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Registre des membres</h3>
         {membres.length === 0 ? (
-          <p className="text-sm text-[#9C8F76]">Aucun membre enregistré pour le moment.</p>
+          <p className="text-sm text-[#64769A]">Aucun membre enregistré pour le moment.</p>
         ) : (
-          <div className="divide-y divide-[#E7DEC9]">
+          <div className="divide-y divide-[#E4EAF6]">
             {membres.map((m) => (
               <div key={m.id} className="py-3 flex items-start justify-between gap-4">
                 <div>
-                  <div className="font-medium text-[#241F1A]">{m.nom}</div>
-                  <div className="text-xs text-[#9C8F76] mt-1">{[...(m.departements || []), ...(m.ministeres || [])].join(" · ") || "Aucun département renseigné"}</div>
+                  <div className="font-medium text-[#0B1B45]">{m.nom}</div>
+                  <div className="text-xs text-[#64769A] mt-1">{[...(m.departements || []), ...(m.ministeres || [])].join(" · ") || "Aucun département renseigné"}</div>
                 </div>
-                <button onClick={() => supprimerMembre(m.id)} className="text-[#9C8F76] hover:text-[#7A3B2E] transition"><Trash2 size={16} /></button>
+                <button onClick={() => supprimerMembre(m.id)} className="text-[#64769A] hover:text-[#0B3BA6] transition"><Trash2 size={16} /></button>
               </div>
             ))}
           </div>
@@ -465,21 +468,21 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
       </Card>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Présence mensuelle</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Présence mensuelle</h3>
         {statsMensuelles.length === 0 ? (
-          <p className="text-sm text-[#9C8F76]">Pas encore de données à afficher.</p>
+          <p className="text-sm text-[#64769A]">Pas encore de données à afficher.</p>
         ) : (
           <div style={{ width: "100%", height: 280 }}>
             <ResponsiveContainer>
               <BarChart data={statsMensuelles}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E7DEC9" />
-                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#5B5142" }} />
-                <YAxis tick={{ fontSize: 12, fill: "#5B5142" }} />
-                <Tooltip contentStyle={{ borderRadius: 4, borderColor: "#D8CDB8" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E4EAF6" />
+                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#3A4A6E" }} />
+                <YAxis tick={{ fontSize: 12, fill: "#3A4A6E" }} />
+                <Tooltip contentStyle={{ borderRadius: 4, borderColor: "#D3DDF0" }} />
                 <Legend />
-                <Bar dataKey="hommes" name="Hommes" fill="#7A3B2E" />
-                <Bar dataKey="femmes" name="Femmes" fill="#B8860B" />
-                <Bar dataKey="jeunes" name="Jeunes" fill="#3A5A54" />
+                <Bar dataKey="hommes" name="Hommes" fill="#0B3BA6" />
+                <Bar dataKey="femmes" name="Femmes" fill="#D81B1B" />
+                <Bar dataKey="jeunes" name="Jeunes" fill="#E3A21A" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -540,7 +543,7 @@ function VueFinances({ token, finances, setFinances }) {
 
   return (
     <div className="space-y-8">
-      {erreur && <p className="text-sm text-[#7A3B2E]">{erreur}</p>}
+      {erreur && <p className="text-sm text-[#0B3BA6]">{erreur}</p>}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatBlock label="Total des entrées" value={`${fmtMontant(totalEntrees)} $`} />
         <StatBlock label="Total des dépenses" value={`${fmtMontant(totalDepenses)} $`} />
@@ -548,13 +551,13 @@ function VueFinances({ token, finances, setFinances }) {
       </div>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Enregistrer un mouvement</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Enregistrer un mouvement</h3>
         <form onSubmit={ajouterMouvement} className="space-y-4">
           <div className="flex gap-2">
             {[{ key: "entree", label: "Entrée" }, { key: "depense", label: "Dépense" }].map((t) => (
               <button
                 type="button" key={t.key} onClick={() => changerType(t.key)}
-                className={`flex-1 text-sm py-2 rounded-sm border transition ${type === t.key ? "bg-[#7A3B2E] border-[#7A3B2E] text-[#FBF8F1]" : "bg-white border-[#CFC3AA] text-[#5B5142]"}`}
+                className={`flex-1 text-sm py-2 rounded-sm border transition ${type === t.key ? "bg-[#0B3BA6] border-[#0B3BA6] text-[#FFFFFF]" : "bg-white border-[#BFCCE6] text-[#3A4A6E]"}`}
               >{t.label}</button>
             ))}
           </div>
@@ -566,27 +569,27 @@ function VueFinances({ token, finances, setFinances }) {
             <TextField label="Montant ($)" type="number" min="0" step="0.01" value={montant} onChange={(e) => setMontant(e.target.value)} placeholder="0.00" />
           </div>
           <TextField label="Description (facultatif)" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Ex : Câbles sono, projet toiture..." />
-          <button type="submit" className="inline-flex items-center gap-2 bg-[#7A3B2E] text-[#FBF8F1] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#652E23] transition">
+          <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
             <Plus size={16} /> Enregistrer
           </button>
         </form>
       </Card>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Journal des mouvements</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Journal des mouvements</h3>
         {mouvementsTries.length === 0 ? (
-          <p className="text-sm text-[#9C8F76]">Aucun mouvement enregistré pour le moment.</p>
+          <p className="text-sm text-[#64769A]">Aucun mouvement enregistré pour le moment.</p>
         ) : (
-          <div className="divide-y divide-[#E7DEC9]">
+          <div className="divide-y divide-[#E4EAF6]">
             {mouvementsTries.map((f) => (
               <div key={f.id} className="py-3 flex items-center justify-between gap-4">
                 <div>
-                  <div className="text-sm font-medium text-[#241F1A]">{f.categorie}{f.description && <span className="text-[#9C8F76]"> — {f.description}</span>}</div>
-                  <div className="text-xs text-[#9C8F76] mt-0.5">{new Date(f.date).toLocaleDateString("fr-FR")}</div>
+                  <div className="text-sm font-medium text-[#0B1B45]">{f.categorie}{f.description && <span className="text-[#64769A]"> — {f.description}</span>}</div>
+                  <div className="text-xs text-[#64769A] mt-0.5">{new Date(f.date).toLocaleDateString("fr-FR")}</div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className={`text-sm font-medium ${f.type === "entree" ? "text-[#3A5A54]" : "text-[#7A3B2E]"}`}>{f.type === "entree" ? "+" : "-"}{fmtMontant(f.montant)} $</span>
-                  <button onClick={() => supprimerMouvement(f.id)} className="text-[#9C8F76] hover:text-[#7A3B2E] transition"><Trash2 size={16} /></button>
+                  <span className={`text-sm font-medium ${f.type === "entree" ? "text-[#0B3BA6]" : "text-[#D81B1B]"}`}>{f.type === "entree" ? "+" : "-"}{fmtMontant(f.montant)} $</span>
+                  <button onClick={() => supprimerMouvement(f.id)} className="text-[#64769A] hover:text-[#0B3BA6] transition"><Trash2 size={16} /></button>
                 </div>
               </div>
             ))}
@@ -595,20 +598,20 @@ function VueFinances({ token, finances, setFinances }) {
       </Card>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Bilan mensuel</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Bilan mensuel</h3>
         {statsMensuelles.length === 0 ? (
-          <p className="text-sm text-[#9C8F76]">Pas encore de données à afficher.</p>
+          <p className="text-sm text-[#64769A]">Pas encore de données à afficher.</p>
         ) : (
           <div style={{ width: "100%", height: 280 }}>
             <ResponsiveContainer>
               <BarChart data={statsMensuelles}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E7DEC9" />
-                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#5B5142" }} />
-                <YAxis tick={{ fontSize: 12, fill: "#5B5142" }} />
-                <Tooltip contentStyle={{ borderRadius: 4, borderColor: "#D8CDB8" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E4EAF6" />
+                <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#3A4A6E" }} />
+                <YAxis tick={{ fontSize: 12, fill: "#3A4A6E" }} />
+                <Tooltip contentStyle={{ borderRadius: 4, borderColor: "#D3DDF0" }} />
                 <Legend />
-                <Bar dataKey="entrees" name="Entrées" fill="#3A5A54" />
-                <Bar dataKey="depenses" name="Dépenses" fill="#7A3B2E" />
+                <Bar dataKey="entrees" name="Entrées" fill="#0B3BA6" />
+                <Bar dataKey="depenses" name="Dépenses" fill="#D81B1B" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -681,17 +684,17 @@ function VueSite({ token, siteInfo, setSiteInfo, horaires, setHoraires, annonces
 
   return (
     <div className="space-y-8">
-      {erreur && <p className="text-sm text-[#7A3B2E]">{erreur}</p>}
+      {erreur && <p className="text-sm text-[#0B3BA6]">{erreur}</p>}
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Photo de la page publique</h3>
-        <div className="relative rounded-sm overflow-hidden border border-[#D8CDB8] bg-[#E7DEC9]" style={{ height: 200 }}>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Photo de la page publique</h3>
+        <div className="relative rounded-sm overflow-hidden border border-[#D3DDF0] bg-[#E4EAF6]" style={{ height: 200 }}>
           {siteInfo.photo ? (
             <img src={siteInfo.photo} alt="" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[#9C8F76] text-sm">Aucune photo</div>
+            <div className="w-full h-full flex items-center justify-center text-[#64769A] text-sm">Aucune photo</div>
           )}
-          <label className="absolute bottom-3 right-3 inline-flex items-center gap-2 bg-[#FBF8F1]/90 backdrop-blur px-3 py-1.5 rounded-sm text-xs text-[#5B5142] border border-[#D8CDB8] cursor-pointer hover:border-[#7A3B2E] transition">
+          <label className="absolute bottom-3 right-3 inline-flex items-center gap-2 bg-[#FFFFFF]/90 backdrop-blur px-3 py-1.5 rounded-sm text-xs text-[#3A4A6E] border border-[#D3DDF0] cursor-pointer hover:border-[#0B3BA6] transition">
             <Camera size={13} /> Changer la photo
             <input type="file" accept="image/*" className="hidden" onChange={(e) => {
               const file = e.target.files?.[0];
@@ -705,24 +708,24 @@ function VueSite({ token, siteInfo, setSiteInfo, horaires, setHoraires, annonces
       </Card>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Texte de présentation</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Texte de présentation</h3>
         <form onSubmit={enregistrerPresentation} className="space-y-4">
           <label className="block text-sm">
-            <span className="text-[#5B5142] font-medium">Message affiché sur la page publique</span>
+            <span className="text-[#3A4A6E] font-medium">Message affiché sur la page publique</span>
             <textarea value={presentation} onChange={(e) => setPresentation(e.target.value)} rows={4}
-              className="mt-1 w-full border border-[#CFC3AA] bg-white rounded-sm px-3 py-2 text-[#241F1A] focus:outline-none focus:ring-2 focus:ring-[#7A3B2E] focus:border-transparent" />
+              className="mt-1 w-full border border-[#BFCCE6] bg-white rounded-sm px-3 py-2 text-[#0B1B45] focus:outline-none focus:ring-2 focus:ring-[#0B3BA6] focus:border-transparent" />
           </label>
-          <button type="submit" className="inline-flex items-center gap-2 bg-[#7A3B2E] text-[#FBF8F1] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#652E23] transition">Enregistrer le texte</button>
+          <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">Enregistrer le texte</button>
         </form>
       </Card>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Jours de culte & activités</h3>
-        <div className="divide-y divide-[#E7DEC9] mb-5">
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Jours de culte & activités</h3>
+        <div className="divide-y divide-[#E4EAF6] mb-5">
           {horaires.map((h) => (
             <div key={h.id} className="py-3 flex items-center justify-between gap-4">
-              <div className="text-sm"><span className="font-medium text-[#241F1A]">{h.jour}</span><span className="text-[#9C8F76]"> — {h.activite} ({h.heure})</span></div>
-              <button onClick={() => supprimerHoraire(h.id)} className="text-[#9C8F76] hover:text-[#7A3B2E] transition"><Trash2 size={16} /></button>
+              <div className="text-sm"><span className="font-medium text-[#0B1B45]">{h.jour}</span><span className="text-[#64769A]"> — {h.activite} ({h.heure})</span></div>
+              <button onClick={() => supprimerHoraire(h.id)} className="text-[#64769A] hover:text-[#0B3BA6] transition"><Trash2 size={16} /></button>
             </div>
           ))}
         </div>
@@ -730,46 +733,46 @@ function VueSite({ token, siteInfo, setSiteInfo, horaires, setHoraires, annonces
           <TextField label="Jour" value={jour} onChange={(e) => setJour(e.target.value)} placeholder="Ex : Vendredi" />
           <TextField label="Horaire" value={heure} onChange={(e) => setHeure(e.target.value)} placeholder="Ex : 18h00 – 20h00" />
           <TextField label="Activité" value={activite} onChange={(e) => setActivite(e.target.value)} placeholder="Ex : Veillée de prière" />
-          <button type="submit" className="inline-flex items-center justify-center gap-2 bg-[#7A3B2E] text-[#FBF8F1] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#652E23] transition h-fit"><Plus size={16} /> Ajouter</button>
+          <button type="submit" className="inline-flex items-center justify-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition h-fit"><Plus size={16} /> Ajouter</button>
         </form>
       </Card>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Publier une annonce</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Publier une annonce</h3>
         <form onSubmit={ajouterAnnonce} className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-3">
             <TextField label="Titre" value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Ex : Conférence de la femme" />
             <TextField label="Date" type="date" value={dateAnnonce} onChange={(e) => setDateAnnonce(e.target.value)} />
           </div>
           <label className="block text-sm">
-            <span className="text-[#5B5142] font-medium">Détails</span>
+            <span className="text-[#3A4A6E] font-medium">Détails</span>
             <textarea value={texte} onChange={(e) => setTexte(e.target.value)} rows={3} placeholder="Décris le programme spécial..."
-              className="mt-1 w-full border border-[#CFC3AA] bg-white rounded-sm px-3 py-2 text-[#241F1A] focus:outline-none focus:ring-2 focus:ring-[#7A3B2E] focus:border-transparent" />
+              className="mt-1 w-full border border-[#BFCCE6] bg-white rounded-sm px-3 py-2 text-[#0B1B45] focus:outline-none focus:ring-2 focus:ring-[#0B3BA6] focus:border-transparent" />
           </label>
           <label className="block text-sm">
-            <span className="text-[#5B5142] font-medium">Affiche (image, facultatif)</span>
+            <span className="text-[#3A4A6E] font-medium">Affiche (image, facultatif)</span>
             <input type="file" accept="image/*" onChange={(e) => {
               const file = e.target.files?.[0];
               if (!file) return;
               const reader = new FileReader();
               reader.onload = () => setImage(reader.result);
               reader.readAsDataURL(file);
-            }} className="mt-1 block w-full text-sm text-[#5B5142]" />
+            }} className="mt-1 block w-full text-sm text-[#3A4A6E]" />
           </label>
-          <button type="submit" className="inline-flex items-center gap-2 bg-[#7A3B2E] text-[#FBF8F1] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#652E23] transition"><Plus size={16} /> Publier l'annonce</button>
+          <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition"><Plus size={16} /> Publier l'annonce</button>
         </form>
       </Card>
 
       <Card className="p-6">
-        <h3 className="font-serif text-lg text-[#241F1A] mb-4">Annonces publiées</h3>
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Annonces publiées</h3>
         {annonces.length === 0 ? (
-          <p className="text-sm text-[#9C8F76]">Aucune annonce pour le moment.</p>
+          <p className="text-sm text-[#64769A]">Aucune annonce pour le moment.</p>
         ) : (
-          <div className="divide-y divide-[#E7DEC9]">
+          <div className="divide-y divide-[#E4EAF6]">
             {[...annonces].sort((a, b) => (a.date < b.date ? 1 : -1)).map((a) => (
               <div key={a.id} className="py-3 flex items-center justify-between gap-4">
-                <div><div className="text-sm font-medium text-[#241F1A]">{a.titre}</div><div className="text-xs text-[#9C8F76]">{new Date(a.date).toLocaleDateString("fr-FR")}</div></div>
-                <button onClick={() => supprimerAnnonce(a.id)} className="text-[#9C8F76] hover:text-[#7A3B2E] transition"><Trash2 size={16} /></button>
+                <div><div className="text-sm font-medium text-[#0B1B45]">{a.titre}</div><div className="text-xs text-[#64769A]">{new Date(a.date).toLocaleDateString("fr-FR")}</div></div>
+                <button onClick={() => supprimerAnnonce(a.id)} className="text-[#64769A] hover:text-[#0B3BA6] transition"><Trash2 size={16} /></button>
               </div>
             ))}
           </div>
@@ -859,7 +862,7 @@ export default function GestionEglise() {
   }
 
   if (chargementPublic) {
-    return <div className="min-h-screen bg-[#F3EEE1] flex items-center justify-center text-[#9C8F76] text-sm">Chargement…</div>;
+    return <div className="min-h-screen bg-[#F2F6FD] flex items-center justify-center text-[#64769A] text-sm">Chargement…</div>;
   }
 
   if (page === "public") {
@@ -879,20 +882,20 @@ export default function GestionEglise() {
   const onglets = tousOnglets.filter((o) => o.roles.includes(session?.role));
 
   return (
-    <div className="min-h-screen bg-[#F3EEE1] text-[#241F1A]">
+    <div className="min-h-screen bg-[#F2F6FD] text-[#0B1B45]">
       <style>{`
         .app-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
-        .font-serif { font-family: Georgia, 'Times New Roman', serif; }
+        .font-serif { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }
       `}</style>
       <div className="app-sans">
-        <header className="border-b border-[#D8CDB8] bg-[#FBF8F1]">
+        <header className="border-b border-[#D3DDF0] bg-[#FFFFFF]">
           <div className="max-w-5xl mx-auto px-6 py-5 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#7A3B2E] flex items-center justify-center text-[#FBF8F1]"><BookOpen size={18} /></div>
+            <img src={logo} alt="" className="h-11 w-11 object-contain" />
             <div className="flex-1">
               <div className="font-serif text-xl leading-tight">{EGLISE.temple}</div>
-              <div className="text-xs text-[#9C8F76]">{session?.email} — {session?.role}</div>
+              <div className="text-xs text-[#64769A]">{session?.email} — {session?.role}</div>
             </div>
-            <button onClick={deconnexion} className="inline-flex items-center gap-2 text-sm border border-[#CFC3AA] px-3 py-1.5 rounded-sm text-[#5B5142] hover:border-[#7A3B2E] hover:text-[#7A3B2E] transition">
+            <button onClick={deconnexion} className="inline-flex items-center gap-2 text-sm border border-[#BFCCE6] px-3 py-1.5 rounded-sm text-[#3A4A6E] hover:border-[#0B3BA6] hover:text-[#0B3BA6] transition">
               <LogOut size={14} /> Déconnexion
             </button>
           </div>
@@ -902,7 +905,7 @@ export default function GestionEglise() {
               const active = onglet === o.key;
               return (
                 <button key={o.key} onClick={() => setOnglet(o.key)}
-                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${active ? "border-[#7A3B2E] text-[#7A3B2E]" : "border-transparent text-[#9C8F76] hover:text-[#5B5142]"}`}>
+                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition ${active ? "border-[#0B3BA6] text-[#0B3BA6]" : "border-transparent text-[#64769A] hover:text-[#3A4A6E]"}`}>
                   <Icon size={15} /> {o.label}
                 </button>
               );
@@ -911,9 +914,9 @@ export default function GestionEglise() {
         </header>
 
         <main className="max-w-5xl mx-auto px-6 py-8">
-          {erreurGlobale && <p className="text-sm text-[#7A3B2E] mb-4">{erreurGlobale}</p>}
+          {erreurGlobale && <p className="text-sm text-[#0B3BA6] mb-4">{erreurGlobale}</p>}
           {chargementAdmin ? (
-            <p className="text-sm text-[#9C8F76]">Chargement des données…</p>
+            <p className="text-sm text-[#64769A]">Chargement des données…</p>
           ) : (
             <>
               {onglet === "ensemble" && <VueEnsemble membres={membres} presences={presences} finances={finances} />}
