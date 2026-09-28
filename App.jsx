@@ -22,6 +22,7 @@ import {
   Lock,
   LogOut,
   Camera,
+  UserCheck,
 } from "lucide-react";
 import logo from "./logo.jpg";
 
@@ -95,9 +96,10 @@ async function sbDelete(table, token, id) {
 }
 
 // ---------- Constantes du domaine ----------
-const DEPARTEMENTS = ["Hommes (AHC)", "Femmes (ASC)", "Jeunesse"];
+const DEPARTEMENTS = ["Hommes (AHC)", "Femmes (ASC)", "Jeunesse", "Enfants"];
 const MINISTERES = ["Chorale / Louange", "Intercession", "École du dimanche"];
-const CATEGORIES_ENTREE = ["Culte d'intersemaine", "École du dimanche", "Dîme"];
+const CATEGORIES_ENTREE = ["Culte d'intersemaine", "École du dimanche", "Offrande", "Dîme", "Don"];
+const FONCTIONS_COMITE = ["Pasteur", "Pasteur adjoint", "Diacre", "Responsable de département"];
 const CATEGORIES_DEPENSE = ["Loyer", "Matériel", "Projet", "Autre"];
 
 const EGLISE = {
@@ -122,6 +124,35 @@ function todayStr() {
 }
 function fmtMontant(n) {
   return new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(n);
+}
+
+// Réduit une photo (téléphone = plusieurs Mo) avant de l'enregistrer
+function redimensionnerImage(file, maxSize = 800, qualite = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        const ratio = Math.min(1, maxSize / Math.max(img.width, img.height));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(img.width * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#FFFFFF";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", qualite));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function initiales(nom) {
+  return (nom || "").split(" ").filter(Boolean).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 }
 
 // ---------- Petits composants d'UI ----------
@@ -190,8 +221,47 @@ function CheckboxGroup({ label, options, selected, onToggle }) {
   );
 }
 
+// ---------- En-tête des pages publiques ----------
+function PublicHeader({ courant, onNavigate, onAccesResponsables }) {
+  const liens = [
+    { key: "public", label: "Accueil" },
+    { key: "comite", label: "Notre comité" },
+  ];
+  return (
+    <header className="bg-[#FFFFFF] border-b-4 border-[#0B3BA6]">
+      <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <img src={logo} alt="Logo EEAD Temple Sion Dokparou" className="h-14 w-14 object-contain" />
+          <div className="font-serif text-lg leading-tight text-[#0B3BA6]">{EGLISE.nom}</div>
+        </div>
+        <button
+          onClick={onAccesResponsables}
+          className="inline-flex items-center gap-2 text-sm border border-[#BFCCE6] px-3 sm:px-4 py-2 rounded-sm text-[#3A4A6E] hover:border-[#0B3BA6] hover:text-[#0B3BA6] transition"
+        >
+          <Lock size={14} />
+          <span className="hidden sm:inline">Espace responsables</span>
+          <span className="sm:hidden">Responsables</span>
+        </button>
+      </div>
+      <nav className="max-w-4xl mx-auto px-6 flex gap-1">
+        {liens.map((l) => (
+          <button
+            key={l.key}
+            onClick={() => onNavigate(l.key)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition ${
+              courant === l.key ? "border-[#0B3BA6] text-[#0B3BA6]" : "border-transparent text-[#64769A] hover:text-[#3A4A6E]"
+            }`}
+          >
+            {l.label}
+          </button>
+        ))}
+      </nav>
+    </header>
+  );
+}
+
 // ---------- Page publique ----------
-function PagePublique({ siteInfo, horaires, annonces, onAccesResponsables }) {
+function PagePublique({ siteInfo, horaires, annonces, onNavigate, onAccesResponsables }) {
   return (
     <div className="min-h-screen bg-[#F2F6FD] text-[#0B1B45]">
       <style>{`
@@ -199,20 +269,7 @@ function PagePublique({ siteInfo, horaires, annonces, onAccesResponsables }) {
         .font-serif { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }
       `}</style>
       <div className="app-sans">
-        <header className="bg-[#FFFFFF] border-b-4 border-[#0B3BA6]">
-          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="Logo EEAD Temple Sion Dokparou" className="h-14 w-14 object-contain" />
-              <div className="font-serif text-lg leading-tight text-[#0B3BA6]">{EGLISE.nom}</div>
-            </div>
-            <button
-              onClick={onAccesResponsables}
-              className="inline-flex items-center gap-2 text-sm border border-[#BFCCE6] px-4 py-2 rounded-sm text-[#3A4A6E] hover:border-[#0B3BA6] hover:text-[#0B3BA6] transition"
-            >
-              <Lock size={14} /> Espace responsables
-            </button>
-          </div>
-        </header>
+        <PublicHeader courant="public" onNavigate={onNavigate} onAccesResponsables={onAccesResponsables} />
 
         <section className="max-w-4xl mx-auto px-6 pt-8">
           <div className="relative rounded-sm overflow-hidden border border-[#D3DDF0] bg-[#E4EAF6]" style={{ height: 320 }}>
@@ -296,6 +353,78 @@ function PagePublique({ siteInfo, horaires, annonces, onAccesResponsables }) {
   );
 }
 
+// ---------- Page publique : comité de l'église ----------
+function CarteMembre({ m }) {
+  return (
+    <Card className="overflow-hidden">
+      <div className="aspect-square bg-[#E4EAF6]">
+        {m.photo ? (
+          <img src={m.photo} alt={m.nom} className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full flex items-center justify-center text-[#FFFFFF] text-4xl font-serif"
+            style={{ background: "linear-gradient(135deg, #082A7A 0%, #0B3BA6 60%, #1E6FE0 100%)" }}
+          >
+            {initiales(m.nom)}
+          </div>
+        )}
+      </div>
+      <div className="p-4">
+        <div className="font-serif text-base leading-tight">{m.nom}</div>
+        <div className="text-xs text-[#64769A] mt-1">
+          {m.fonction === "Responsable de département" && m.departement ? `Responsable — ${m.departement}` : m.fonction}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function PageComite({ comite, onNavigate, onAccesResponsables }) {
+  const groupes = [
+    { titre: "Pasteur", filtre: (m) => m.fonction === "Pasteur" },
+    { titre: "Pasteur adjoint", filtre: (m) => m.fonction === "Pasteur adjoint" },
+    { titre: "Diacres", filtre: (m) => m.fonction === "Diacre" },
+    { titre: "Responsables de départements", filtre: (m) => m.fonction === "Responsable de département" },
+  ];
+  return (
+    <div className="min-h-screen bg-[#F2F6FD] text-[#0B1B45]">
+      <style>{`
+        .app-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+        .font-serif { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }
+      `}</style>
+      <div className="app-sans">
+        <PublicHeader courant="comite" onNavigate={onNavigate} onAccesResponsables={onAccesResponsables} />
+        <section className="max-w-4xl mx-auto px-6 pt-8 pb-4">
+          <h1 className="font-serif text-3xl text-[#0B3BA6]">Notre comité</h1>
+          <p className="mt-3 text-[#3A4A6E] leading-relaxed max-w-xl">
+            Ceux qui conduisent et servent la maison, au nom de {EGLISE.nom}.
+          </p>
+
+          {comite.length === 0 ? (
+            <p className="mt-10 text-sm text-[#64769A]">Le comité sera bientôt présenté ici.</p>
+          ) : (
+            groupes.map((g) => {
+              const membres = comite.filter(g.filtre);
+              if (membres.length === 0) return null;
+              return (
+                <div key={g.titre} className="mt-10">
+                  <h2 className="font-serif text-lg mb-4 pb-2 border-b-2 border-[#D81B1B] inline-block">{g.titre}</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    {membres.map((m) => <CarteMembre key={m.id} m={m} />)}
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </section>
+        <footer className="max-w-4xl mx-auto px-6 py-10 mt-6 text-xs text-[#64769A]">
+          {EGLISE.nom} — {EGLISE.temple}
+        </footer>
+      </div>
+    </div>
+  );
+}
+
 // ---------- Page de connexion (vraie authentification Supabase) ----------
 function PageConnexion({ onConnexion, onRetour }) {
   const [email, setEmail] = useState("");
@@ -363,6 +492,7 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
   const [hommes, setHommes] = useState("");
   const [femmes, setFemmes] = useState("");
   const [jeunes, setJeunes] = useState("");
+  const [enfants, setEnfants] = useState("");
   const [erreur, setErreur] = useState("");
 
   const toggleDep = (d) => setDeps((cur) => (cur.includes(d) ? cur.filter((x) => x !== d) : [...cur, d]));
@@ -387,13 +517,13 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
 
   async function ajouterPresence(e) {
     e.preventDefault();
-    if (!hommes && !femmes && !jeunes) return;
+    if (!hommes && !femmes && !jeunes && !enfants) return;
     try {
       const nouveau = await sbInsert("presences", token, {
-        date: dateP, hommes: Number(hommes) || 0, femmes: Number(femmes) || 0, jeunes: Number(jeunes) || 0,
+        date: dateP, hommes: Number(hommes) || 0, femmes: Number(femmes) || 0, jeunes: Number(jeunes) || 0, enfants: Number(enfants) || 0,
       });
       setPresences((cur) => [...cur, nouveau]);
-      setHommes(""); setFemmes(""); setJeunes("");
+      setHommes(""); setFemmes(""); setJeunes(""); setEnfants("");
     } catch (err) { setErreur(err.message); }
   }
 
@@ -401,14 +531,14 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
     const map = {};
     for (const p of presences) {
       const key = moisKey(p.date);
-      if (!map[key]) map[key] = { key, label: moisLabel(p.date), hommes: 0, femmes: 0, jeunes: 0 };
-      map[key].hommes += p.hommes; map[key].femmes += p.femmes; map[key].jeunes += p.jeunes;
+      if (!map[key]) map[key] = { key, label: moisLabel(p.date), hommes: 0, femmes: 0, jeunes: 0, enfants: 0 };
+      map[key].hommes += p.hommes; map[key].femmes += p.femmes; map[key].jeunes += p.jeunes; map[key].enfants += p.enfants || 0;
     }
     return Object.values(map).sort((a, b) => (a.key > b.key ? 1 : -1));
   }, [presences]);
 
   const dernierePresence = presences[presences.length - 1];
-  const derniereTotal = dernierePresence ? dernierePresence.hommes + dernierePresence.femmes + dernierePresence.jeunes : 0;
+  const derniereTotal = dernierePresence ? dernierePresence.hommes + dernierePresence.femmes + dernierePresence.jeunes + (dernierePresence.enfants || 0) : 0;
 
   return (
     <div className="space-y-8">
@@ -436,10 +566,11 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
           <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Comptage du dimanche</h3>
           <form onSubmit={ajouterPresence} className="space-y-4">
             <TextField label="Date du culte" type="date" value={dateP} onChange={(e) => setDateP(e.target.value)} />
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <TextField label="Hommes" type="number" min="0" value={hommes} onChange={(e) => setHommes(e.target.value)} />
               <TextField label="Femmes" type="number" min="0" value={femmes} onChange={(e) => setFemmes(e.target.value)} />
               <TextField label="Jeunes" type="number" min="0" value={jeunes} onChange={(e) => setJeunes(e.target.value)} />
+              <TextField label="Enfants" type="number" min="0" value={enfants} onChange={(e) => setEnfants(e.target.value)} />
             </div>
             <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
               <Plus size={16} /> Enregistrer le comptage
@@ -483,6 +614,7 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
                 <Bar dataKey="hommes" name="Hommes" fill="#0B3BA6" />
                 <Bar dataKey="femmes" name="Femmes" fill="#D81B1B" />
                 <Bar dataKey="jeunes" name="Jeunes" fill="#E3A21A" />
+                <Bar dataKey="enfants" name="Enfants" fill="#1E6FE0" />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -621,6 +753,124 @@ function VueFinances({ token, finances, setFinances }) {
   );
 }
 
+// ---------- Vue Comité (admin) ----------
+function VueComite({ token, comite, setComite }) {
+  const [nom, setNom] = useState("");
+  const [fonction, setFonction] = useState(FONCTIONS_COMITE[0]);
+  const [departement, setDepartement] = useState("");
+  const [photo, setPhoto] = useState(null);
+  const [erreur, setErreur] = useState("");
+
+  async function choisirPhoto(file, apres) {
+    try {
+      apres(await redimensionnerImage(file, 600));
+    } catch (err) {
+      setErreur("Image illisible.");
+    }
+  }
+
+  async function ajouter(e) {
+    e.preventDefault();
+    if (!nom.trim()) return;
+    try {
+      const nouveau = await sbInsert("comite", token, {
+        nom: nom.trim(),
+        fonction,
+        departement: fonction === "Responsable de département" ? departement.trim() : "",
+        photo,
+      });
+      setComite((cur) => [...cur, nouveau]);
+      setNom(""); setDepartement(""); setPhoto(null); setErreur("");
+    } catch (err) { setErreur(err.message); }
+  }
+
+  async function supprimer(id) {
+    try {
+      await sbDelete("comite", token, id);
+      setComite((cur) => cur.filter((m) => m.id !== id));
+    } catch (err) { setErreur(err.message); }
+  }
+
+  async function remplacerPhoto(id, dataUrl) {
+    try {
+      const maj = await sbUpdate("comite", token, id, { photo: dataUrl });
+      setComite((cur) => cur.map((m) => (m.id === id ? { ...m, photo: maj.photo } : m)));
+    } catch (err) { setErreur(err.message); }
+  }
+
+  return (
+    <div className="space-y-8">
+      {erreur && <p className="text-sm text-[#D81B1B]">{erreur}</p>}
+
+      <Card className="p-6">
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Ajouter au comité</h3>
+        <form onSubmit={ajouter} className="space-y-4">
+          <div className="grid sm:grid-cols-2 gap-3">
+            <TextField label="Nom complet" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex : Pasteur Jean Dossou" />
+            <SelectField label="Fonction" value={fonction} onChange={(e) => setFonction(e.target.value)}>
+              {FONCTIONS_COMITE.map((f) => <option key={f} value={f}>{f}</option>)}
+            </SelectField>
+          </div>
+          {fonction === "Responsable de département" && (
+            <div>
+              <TextField label="Département" list="liste-departements" value={departement} onChange={(e) => setDepartement(e.target.value)} placeholder="Ex : Chorale / Louange" />
+              <datalist id="liste-departements">
+                {[...DEPARTEMENTS, ...MINISTERES].map((d) => <option key={d} value={d} />)}
+              </datalist>
+            </div>
+          )}
+          <div className="flex items-center gap-4">
+            <div className="w-20 h-20 rounded-sm overflow-hidden border border-[#D3DDF0] bg-[#E4EAF6] flex items-center justify-center text-xs text-[#64769A]">
+              {photo ? <img src={photo} alt="" className="w-full h-full object-cover" /> : "Photo"}
+            </div>
+            <label className="inline-flex items-center gap-2 text-sm border border-[#BFCCE6] px-3 py-2 rounded-sm text-[#3A4A6E] cursor-pointer hover:border-[#0B3BA6] hover:text-[#0B3BA6] transition">
+              <Camera size={14} /> Choisir une photo
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) choisirPhoto(file, setPhoto);
+              }} />
+            </label>
+          </div>
+          <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
+            <Plus size={16} /> Ajouter
+          </button>
+        </form>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Membres du comité</h3>
+        {comite.length === 0 ? (
+          <p className="text-sm text-[#64769A]">Personne n'a encore été ajouté.</p>
+        ) : (
+          <div className="divide-y divide-[#E4EAF6]">
+            {comite.map((m) => (
+              <div key={m.id} className="py-3 flex items-center gap-4">
+                <div className="w-14 h-14 rounded-sm overflow-hidden bg-[#E4EAF6] shrink-0 flex items-center justify-center text-sm text-[#64769A]">
+                  {m.photo ? <img src={m.photo} alt="" className="w-full h-full object-cover" /> : initiales(m.nom)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-[#0B1B45] truncate">{m.nom}</div>
+                  <div className="text-xs text-[#64769A]">
+                    {m.fonction}{m.departement ? ` — ${m.departement}` : ""}
+                  </div>
+                </div>
+                <label className="text-xs text-[#0B3BA6] cursor-pointer hover:underline">
+                  Changer la photo
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) choisirPhoto(file, (d) => remplacerPhoto(m.id, d));
+                  }} />
+                </label>
+                <button onClick={() => supprimer(m.id)} className="text-[#64769A] hover:text-[#D81B1B] transition"><Trash2 size={16} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 // ---------- Vue Site & Annonces ----------
 function VueSite({ token, siteInfo, setSiteInfo, horaires, setHoraires, annonces, setAnnonces }) {
   const [presentation, setPresentation] = useState(siteInfo.presentation || "");
@@ -699,9 +949,7 @@ function VueSite({ token, siteInfo, setSiteInfo, horaires, setHoraires, annonces
             <input type="file" accept="image/*" className="hidden" onChange={(e) => {
               const file = e.target.files?.[0];
               if (!file) return;
-              const reader = new FileReader();
-              reader.onload = () => changerPhoto(reader.result);
-              reader.readAsDataURL(file);
+              redimensionnerImage(file, 1400).then(changerPhoto).catch(() => setErreur("Image illisible."));
             }} />
           </label>
         </div>
@@ -754,9 +1002,7 @@ function VueSite({ token, siteInfo, setSiteInfo, horaires, setHoraires, annonces
             <input type="file" accept="image/*" onChange={(e) => {
               const file = e.target.files?.[0];
               if (!file) return;
-              const reader = new FileReader();
-              reader.onload = () => setImage(reader.result);
-              reader.readAsDataURL(file);
+              redimensionnerImage(file, 1000).then(setImage).catch(() => setErreur("Image illisible."));
             }} className="mt-1 block w-full text-sm text-[#3A4A6E]" />
           </label>
           <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition"><Plus size={16} /> Publier l'annonce</button>
@@ -787,7 +1033,7 @@ function VueEnsemble({ membres, presences, finances }) {
   const totalEntrees = finances.filter((f) => f.type === "entree").reduce((s, f) => s + Number(f.montant), 0);
   const totalDepenses = finances.filter((f) => f.type === "depense").reduce((s, f) => s + Number(f.montant), 0);
   const dernierePresence = presences[presences.length - 1];
-  const derniereTotal = dernierePresence ? dernierePresence.hommes + dernierePresence.femmes + dernierePresence.jeunes : 0;
+  const derniereTotal = dernierePresence ? dernierePresence.hommes + dernierePresence.femmes + dernierePresence.jeunes + (dernierePresence.enfants || 0) : 0;
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -801,7 +1047,7 @@ function VueEnsemble({ membres, presences, finances }) {
 
 // ---------- Application principale ----------
 export default function GestionEglise() {
-  const [page, setPage] = useState("public"); // "public" | "connexion" | "admin"
+  const [page, setPage] = useState("public"); // "public" | "comite" | "connexion" | "admin"
   const [onglet, setOnglet] = useState("ensemble");
   const [session, setSession] = useState(null); // { token, role, email }
   const [chargementPublic, setChargementPublic] = useState(true);
@@ -811,6 +1057,7 @@ export default function GestionEglise() {
   const [siteInfo, setSiteInfo] = useState({ id: 1, presentation: "", photo: null });
   const [horaires, setHoraires] = useState([]);
   const [annonces, setAnnonces] = useState([]);
+  const [comite, setComite] = useState([]);
   const [membres, setMembres] = useState([]);
   const [presences, setPresences] = useState([]);
   const [finances, setFinances] = useState([]);
@@ -832,6 +1079,16 @@ export default function GestionEglise() {
       } finally {
         setChargementPublic(false);
       }
+    })();
+  }, []);
+
+  // Le comité est chargé à part : si la table n'existe pas encore, l'accueil reste intact
+  useEffect(() => {
+    (async () => {
+      try {
+        const c = await sbSelect("comite", null, "&order=created_at.asc");
+        setComite(c || []);
+      } catch (e) {}
     })();
   }, []);
 
@@ -866,7 +1123,11 @@ export default function GestionEglise() {
   }
 
   if (page === "public") {
-    return <PagePublique siteInfo={siteInfo} horaires={horaires} annonces={annonces} onAccesResponsables={() => setPage("connexion")} />;
+    return <PagePublique siteInfo={siteInfo} horaires={horaires} annonces={annonces} onNavigate={setPage} onAccesResponsables={() => setPage("connexion")} />;
+  }
+
+  if (page === "comite") {
+    return <PageComite comite={comite} onNavigate={setPage} onAccesResponsables={() => setPage("connexion")} />;
   }
 
   if (page === "connexion") {
@@ -877,6 +1138,7 @@ export default function GestionEglise() {
     { key: "ensemble", label: "Vue d'ensemble", icon: LayoutGrid, roles: ["admin", "finances", "effectif"] },
     { key: "effectif", label: "Effectif", icon: Users, roles: ["admin", "effectif"] },
     { key: "finances", label: "Finances", icon: Wallet, roles: ["admin", "finances"] },
+    { key: "comite", label: "Comité", icon: UserCheck, roles: ["admin"] },
     { key: "site", label: "Site & Annonces", icon: BookOpen, roles: ["admin"] },
   ];
   const onglets = tousOnglets.filter((o) => o.roles.includes(session?.role));
@@ -924,6 +1186,7 @@ export default function GestionEglise() {
                 <VueEffectif token={session.token} membres={membres} setMembres={setMembres} presences={presences} setPresences={setPresences} />
               )}
               {onglet === "finances" && <VueFinances token={session.token} finances={finances} setFinances={setFinances} />}
+              {onglet === "comite" && <VueComite token={session.token} comite={comite} setComite={setComite} />}
               {onglet === "site" && (
                 <VueSite token={session.token} siteInfo={siteInfo} setSiteInfo={setSiteInfo} horaires={horaires} setHoraires={setHoraires} annonces={annonces} setAnnonces={setAnnonces} />
               )}
