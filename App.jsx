@@ -23,6 +23,8 @@ import {
   LogOut,
   Camera,
   UserCheck,
+  Mic,
+  PlayCircle,
 } from "lucide-react";
 import logo from "./logo.jpg";
 
@@ -226,6 +228,7 @@ function PublicHeader({ courant, onNavigate, onAccesResponsables }) {
   const liens = [
     { key: "public", label: "Accueil" },
     { key: "comite", label: "Notre comité" },
+    { key: "enseignements", label: "Enseignements" },
   ];
   return (
     <header className="bg-[#FFFFFF] border-b-4 border-[#0B3BA6]">
@@ -258,6 +261,13 @@ function PublicHeader({ courant, onNavigate, onAccesResponsables }) {
       </nav>
     </header>
   );
+}
+
+// Reconnaît un lien YouTube et renvoie une URL de lecture intégrée. Sinon, renvoie null.
+function idYoutube(url) {
+  if (!url) return null;
+  const m = url.match(/(?:youtu\.be\/|v=|shorts\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
 }
 
 // ---------- Page publique ----------
@@ -415,6 +425,73 @@ function PageComite({ comite, onNavigate, onAccesResponsables }) {
                 </div>
               );
             })
+          )}
+        </section>
+        <footer className="max-w-4xl mx-auto px-6 py-10 mt-6 text-xs text-[#64769A]">
+          {EGLISE.nom} — {EGLISE.temple}
+        </footer>
+      </div>
+    </div>
+  );
+}
+
+// ---------- Page publique : enseignements & prédications ----------
+function CartePredication({ e }) {
+  const idv = idYoutube(e.video_url);
+  return (
+    <Card className="overflow-hidden">
+      {e.type === "video" && idv ? (
+        <div className="aspect-video bg-black">
+          <iframe
+            className="w-full h-full"
+            src={`https://www.youtube.com/embed/${idv}`}
+            title={e.titre}
+            allowFullScreen
+          />
+        </div>
+      ) : e.type === "video" ? (
+        <a href={e.video_url} target="_blank" rel="noreferrer" className="aspect-video bg-[#0B1B45] flex flex-col items-center justify-center gap-2 text-[#FFFFFF]">
+          <PlayCircle size={40} />
+          <span className="text-xs">Regarder la vidéo</span>
+        </a>
+      ) : (
+        <div className="aspect-video bg-[#E4EAF6] flex items-center justify-center text-[#0B3BA6]">
+          <Mic size={36} />
+        </div>
+      )}
+      <div className="p-5">
+        <div className="text-xs text-[#64769A]">
+          {new Date(e.date).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+          {e.predicateur ? ` — ${e.predicateur}` : ""}
+        </div>
+        <h3 className="font-serif text-lg mt-1">{e.titre}</h3>
+        {e.texte && <p className="text-sm text-[#3A4A6E] mt-2 leading-relaxed whitespace-pre-line">{e.texte}</p>}
+      </div>
+    </Card>
+  );
+}
+
+function PageEnseignements({ enseignements, onNavigate, onAccesResponsables }) {
+  return (
+    <div className="min-h-screen bg-[#F2F6FD] text-[#0B1B45]">
+      <style>{`
+        .app-sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+        .font-serif { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; font-weight: 800; letter-spacing: -0.01em; }
+      `}</style>
+      <div className="app-sans">
+        <PublicHeader courant="enseignements" onNavigate={onNavigate} onAccesResponsables={onAccesResponsables} />
+        <section className="max-w-4xl mx-auto px-6 pt-8 pb-4">
+          <h1 className="font-serif text-3xl text-[#0B3BA6]">Enseignements & prédications</h1>
+          <p className="mt-3 text-[#3A4A6E] leading-relaxed max-w-xl">
+            Retrouve ici la Parole partagée à {EGLISE.temple}, en texte ou en vidéo.
+          </p>
+
+          {enseignements.length === 0 ? (
+            <p className="mt-10 text-sm text-[#64769A]">Aucun enseignement publié pour le moment.</p>
+          ) : (
+            <div className="mt-8 grid sm:grid-cols-2 gap-6">
+              {[...enseignements].sort((a, b) => (a.date < b.date ? 1 : -1)).map((e) => <CartePredication key={e.id} e={e} />)}
+            </div>
           )}
         </section>
         <footer className="max-w-4xl mx-auto px-6 py-10 mt-6 text-xs text-[#64769A]">
@@ -753,6 +830,99 @@ function VueFinances({ token, finances, setFinances }) {
   );
 }
 
+// ---------- Vue Enseignements (admin) ----------
+function VueEnseignements({ token, enseignements, setEnseignements }) {
+  const [type, setType] = useState("texte");
+  const [titre, setTitre] = useState("");
+  const [predicateur, setPredicateur] = useState("");
+  const [date, setDate] = useState(todayStr());
+  const [texte, setTexte] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [erreur, setErreur] = useState("");
+
+  async function publier(e) {
+    e.preventDefault();
+    if (!titre.trim()) return;
+    if (type === "texte" && !texte.trim()) return;
+    if (type === "video" && !videoUrl.trim()) return;
+    try {
+      const nouveau = await sbInsert("enseignements", token, {
+        type, titre: titre.trim(), predicateur: predicateur.trim(), date,
+        texte: type === "texte" ? texte.trim() : "",
+        video_url: type === "video" ? videoUrl.trim() : "",
+      });
+      setEnseignements((cur) => [...cur, nouveau]);
+      setTitre(""); setPredicateur(""); setTexte(""); setVideoUrl(""); setErreur("");
+    } catch (err) { setErreur(err.message); }
+  }
+
+  async function supprimer(id) {
+    try {
+      await sbDelete("enseignements", token, id);
+      setEnseignements((cur) => cur.filter((e) => e.id !== id));
+    } catch (err) { setErreur(err.message); }
+  }
+
+  return (
+    <div className="space-y-8">
+      {erreur && <p className="text-sm text-[#D81B1B]">{erreur}</p>}
+
+      <Card className="p-6">
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Publier un enseignement</h3>
+        <form onSubmit={publier} className="space-y-4">
+          <div className="flex gap-2">
+            {[{ key: "texte", label: "Texte" }, { key: "video", label: "Vidéo" }].map((t) => (
+              <button
+                type="button" key={t.key} onClick={() => setType(t.key)}
+                className={`flex-1 text-sm py-2 rounded-sm border transition ${type === t.key ? "bg-[#0B3BA6] border-[#0B3BA6] text-[#FFFFFF]" : "bg-white border-[#BFCCE6] text-[#3A4A6E]"}`}
+              >{t.label}</button>
+            ))}
+          </div>
+          <div className="grid sm:grid-cols-3 gap-3">
+            <TextField label="Titre" value={titre} onChange={(e) => setTitre(e.target.value)} placeholder="Ex : La foi qui déplace les montagnes" />
+            <TextField label="Prédicateur (facultatif)" value={predicateur} onChange={(e) => setPredicateur(e.target.value)} placeholder="Ex : Pasteur Jean Dossou" />
+            <TextField label="Date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          </div>
+          {type === "texte" ? (
+            <label className="block text-sm">
+              <span className="text-[#3A4A6E] font-medium">Contenu de l'enseignement</span>
+              <textarea value={texte} onChange={(e) => setTexte(e.target.value)} rows={6} placeholder="Écris ou colle le texte de la prédication..."
+                className="mt-1 w-full border border-[#BFCCE6] bg-white rounded-sm px-3 py-2 text-[#0B1B45] focus:outline-none focus:ring-2 focus:ring-[#0B3BA6] focus:border-transparent" />
+            </label>
+          ) : (
+            <TextField label="Lien de la vidéo (YouTube ou autre)" value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://youtube.com/watch?v=..." />
+          )}
+          <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
+            <Plus size={16} /> Publier
+          </button>
+        </form>
+      </Card>
+
+      <Card className="p-6">
+        <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Enseignements publiés</h3>
+        {enseignements.length === 0 ? (
+          <p className="text-sm text-[#64769A]">Rien n'a encore été publié.</p>
+        ) : (
+          <div className="divide-y divide-[#E4EAF6]">
+            {[...enseignements].sort((a, b) => (a.date < b.date ? 1 : -1)).map((e) => (
+              <div key={e.id} className="py-3 flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-sm font-medium text-[#0B1B45]">{e.titre}</div>
+                  <div className="text-xs text-[#64769A]">
+                    {e.type === "video" ? "Vidéo" : "Texte"} — {new Date(e.date).toLocaleDateString("fr-FR")}
+                    {e.predicateur ? ` — ${e.predicateur}` : ""}
+                  </div>
+                </div>
+                <button onClick={() => supprimer(e.id)} className="text-[#64769A] hover:text-[#D81B1B] transition"><Trash2 size={16} /></button>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+    </div>
+  );
+}
+
 // ---------- Vue Comité (admin) ----------
 function VueComite({ token, comite, setComite }) {
   const [nom, setNom] = useState("");
@@ -1058,6 +1228,7 @@ export default function GestionEglise() {
   const [horaires, setHoraires] = useState([]);
   const [annonces, setAnnonces] = useState([]);
   const [comite, setComite] = useState([]);
+  const [enseignements, setEnseignements] = useState([]);
   const [membres, setMembres] = useState([]);
   const [presences, setPresences] = useState([]);
   const [finances, setFinances] = useState([]);
@@ -1088,6 +1259,10 @@ export default function GestionEglise() {
       try {
         const c = await sbSelect("comite", null, "&order=created_at.asc");
         setComite(c || []);
+      } catch (e) {}
+      try {
+        const en = await sbSelect("enseignements", null);
+        setEnseignements(en || []);
       } catch (e) {}
     })();
   }, []);
@@ -1130,6 +1305,10 @@ export default function GestionEglise() {
     return <PageComite comite={comite} onNavigate={setPage} onAccesResponsables={() => setPage("connexion")} />;
   }
 
+  if (page === "enseignements") {
+    return <PageEnseignements enseignements={enseignements} onNavigate={setPage} onAccesResponsables={() => setPage("connexion")} />;
+  }
+
   if (page === "connexion") {
     return <PageConnexion onConnexion={connexion} onRetour={() => setPage("public")} />;
   }
@@ -1139,6 +1318,7 @@ export default function GestionEglise() {
     { key: "effectif", label: "Effectif", icon: Users, roles: ["admin", "effectif"] },
     { key: "finances", label: "Finances", icon: Wallet, roles: ["admin", "finances"] },
     { key: "comite", label: "Comité", icon: UserCheck, roles: ["admin"] },
+    { key: "enseignements", label: "Enseignements", icon: Mic, roles: ["admin"] },
     { key: "site", label: "Site & Annonces", icon: BookOpen, roles: ["admin"] },
   ];
   const onglets = tousOnglets.filter((o) => o.roles.includes(session?.role));
@@ -1187,6 +1367,7 @@ export default function GestionEglise() {
               )}
               {onglet === "finances" && <VueFinances token={session.token} finances={finances} setFinances={setFinances} />}
               {onglet === "comite" && <VueComite token={session.token} comite={comite} setComite={setComite} />}
+              {onglet === "enseignements" && <VueEnseignements token={session.token} enseignements={enseignements} setEnseignements={setEnseignements} />}
               {onglet === "site" && (
                 <VueSite token={session.token} siteInfo={siteInfo} setSiteInfo={setSiteInfo} horaires={horaires} setHoraires={setHoraires} annonces={annonces} setAnnonces={setAnnonces} />
               )}
