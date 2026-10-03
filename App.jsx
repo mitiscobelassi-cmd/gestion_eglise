@@ -563,8 +563,17 @@ function PageConnexion({ onConnexion, onRetour }) {
 // ---------- Vue Effectif ----------
 function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
   const [nom, setNom] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [dateNaissance, setDateNaissance] = useState("");
+  const [telephone, setTelephone] = useState("");
+  const [quartier, setQuartier] = useState("");
+  const [baptiseEau, setBaptiseEau] = useState(false);
+  const [dateBaptiseEau, setDateBaptiseEau] = useState("");
+  const [baptiseSaintEsprit, setBaptiseSaintEsprit] = useState(false);
+  const [dateBaptiseSaintEsprit, setDateBaptiseSaintEsprit] = useState("");
   const [deps, setDeps] = useState([]);
   const [mins, setMins] = useState([]);
+  const [membreOuvert, setMembreOuvert] = useState(null);
   const [dateP, setDateP] = useState(todayStr());
   const [hommes, setHommes] = useState("");
   const [femmes, setFemmes] = useState("");
@@ -579,9 +588,22 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
     e.preventDefault();
     if (!nom.trim()) return;
     try {
-      const nouveau = await sbInsert("membres", token, { nom: nom.trim(), departements: deps, ministeres: mins });
+      const nouveau = await sbInsert("membres", token, {
+        nom: nom.trim(),
+        prenom: prenom.trim(),
+        date_naissance: dateNaissance || null,
+        telephone: telephone.trim(),
+        quartier: quartier.trim(),
+        baptise_eau: baptiseEau,
+        date_baptise_eau: baptiseEau ? dateBaptiseEau || null : null,
+        baptise_saint_esprit: baptiseSaintEsprit,
+        date_baptise_saint_esprit: baptiseSaintEsprit ? dateBaptiseSaintEsprit || null : null,
+        departements: deps, ministeres: mins,
+      });
       setMembres((cur) => [...cur, nouveau]);
-      setNom(""); setDeps([]); setMins([]);
+      setNom(""); setPrenom(""); setDateNaissance(""); setTelephone(""); setQuartier("");
+      setBaptiseEau(false); setDateBaptiseEau(""); setBaptiseSaintEsprit(false); setDateBaptiseSaintEsprit("");
+      setDeps([]); setMins([]);
     } catch (err) { setErreur(err.message); }
   }
 
@@ -630,7 +652,37 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
         <Card className="p-6">
           <h3 className="font-serif text-lg text-[#0B1B45] mb-4">Ajouter un membre</h3>
           <form onSubmit={ajouterMembre} className="space-y-4">
-            <TextField label="Nom complet" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex : Grace Mbala" />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <TextField label="Nom" value={nom} onChange={(e) => setNom(e.target.value)} placeholder="Ex : Mbala" />
+              <TextField label="Prénom" value={prenom} onChange={(e) => setPrenom(e.target.value)} placeholder="Ex : Grace" />
+            </div>
+            <div className="grid sm:grid-cols-3 gap-3">
+              <TextField label="Date de naissance" type="date" value={dateNaissance} onChange={(e) => setDateNaissance(e.target.value)} />
+              <TextField label="Téléphone" value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="Ex : 97 00 00 00" />
+              <TextField label="Quartier" value={quartier} onChange={(e) => setQuartier(e.target.value)} placeholder="Ex : Dokparou" />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="inline-flex items-center gap-2 text-sm text-[#3A4A6E] font-medium">
+                  <input type="checkbox" checked={baptiseEau} onChange={(e) => setBaptiseEau(e.target.checked)} className="accent-[#0B3BA6]" />
+                  Baptisé d'eau
+                </label>
+                {baptiseEau && (
+                  <input type="date" value={dateBaptiseEau} onChange={(e) => setDateBaptiseEau(e.target.value)}
+                    className="mt-2 w-full border border-[#BFCCE6] bg-white rounded-sm px-3 py-2 text-[#0B1B45] focus:outline-none focus:ring-2 focus:ring-[#0B3BA6] focus:border-transparent" />
+                )}
+              </div>
+              <div>
+                <label className="inline-flex items-center gap-2 text-sm text-[#3A4A6E] font-medium">
+                  <input type="checkbox" checked={baptiseSaintEsprit} onChange={(e) => setBaptiseSaintEsprit(e.target.checked)} className="accent-[#0B3BA6]" />
+                  Baptisé du Saint-Esprit
+                </label>
+                {baptiseSaintEsprit && (
+                  <input type="date" value={dateBaptiseSaintEsprit} onChange={(e) => setDateBaptiseSaintEsprit(e.target.value)}
+                    className="mt-2 w-full border border-[#BFCCE6] bg-white rounded-sm px-3 py-2 text-[#0B1B45] focus:outline-none focus:ring-2 focus:ring-[#0B3BA6] focus:border-transparent" />
+                )}
+              </div>
+            </div>
             <CheckboxGroup label="Département d'appartenance" options={DEPARTEMENTS} selected={deps} onToggle={toggleDep} />
             <CheckboxGroup label="Département(s) ministériel(s)" options={MINISTERES} selected={mins} onToggle={toggleMin} />
             <button type="submit" className="inline-flex items-center gap-2 bg-[#0B3BA6] text-[#FFFFFF] px-4 py-2 rounded-sm text-sm font-medium hover:bg-[#082A7A] transition">
@@ -662,15 +714,29 @@ function VueEffectif({ token, membres, setMembres, presences, setPresences }) {
           <p className="text-sm text-[#64769A]">Aucun membre enregistré pour le moment.</p>
         ) : (
           <div className="divide-y divide-[#E4EAF6]">
-            {membres.map((m) => (
-              <div key={m.id} className="py-3 flex items-start justify-between gap-4">
-                <div>
-                  <div className="font-medium text-[#0B1B45]">{m.nom}</div>
-                  <div className="text-xs text-[#64769A] mt-1">{[...(m.departements || []), ...(m.ministeres || [])].join(" · ") || "Aucun département renseigné"}</div>
+            {membres.map((m) => {
+              const ouvert = membreOuvert === m.id;
+              return (
+                <div key={m.id} className="py-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <button className="text-left flex-1" onClick={() => setMembreOuvert(ouvert ? null : m.id)}>
+                      <div className="font-medium text-[#0B1B45]">{[m.prenom, m.nom].filter(Boolean).join(" ") || m.nom}</div>
+                      <div className="text-xs text-[#64769A] mt-1">{[...(m.departements || []), ...(m.ministeres || [])].join(" · ") || "Aucun département renseigné"}</div>
+                    </button>
+                    <button onClick={() => supprimerMembre(m.id)} className="text-[#64769A] hover:text-[#0B3BA6] transition shrink-0"><Trash2 size={16} /></button>
+                  </div>
+                  {ouvert && (
+                    <div className="mt-2 ml-0 text-xs text-[#3A4A6E] space-y-1 bg-[#F2F6FD] rounded-sm p-3">
+                      {m.date_naissance && <div>Né(e) le {new Date(m.date_naissance).toLocaleDateString("fr-FR")}</div>}
+                      {m.telephone && <div>Téléphone : {m.telephone}</div>}
+                      {m.quartier && <div>Quartier : {m.quartier}</div>}
+                      <div>Baptisé d'eau : {m.baptise_eau ? `Oui${m.date_baptise_eau ? " — " + new Date(m.date_baptise_eau).toLocaleDateString("fr-FR") : ""}` : "Non"}</div>
+                      <div>Baptisé du Saint-Esprit : {m.baptise_saint_esprit ? `Oui${m.date_baptise_saint_esprit ? " — " + new Date(m.date_baptise_saint_esprit).toLocaleDateString("fr-FR") : ""}` : "Non"}</div>
+                    </div>
+                  )}
                 </div>
-                <button onClick={() => supprimerMembre(m.id)} className="text-[#64769A] hover:text-[#0B3BA6] transition"><Trash2 size={16} /></button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </Card>
