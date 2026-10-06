@@ -29,6 +29,8 @@ import {
   Pencil,
   Download,
   Printer,
+  PhoneCall,
+  MessageCircle,
 } from "lucide-react";
 
 // ---------- Connexion à Supabase ----------
@@ -467,6 +469,23 @@ function CarteMembre({ m }) {
         <div className="text-xs text-[#64769A] mt-1">
           {m.fonction === "Responsable de département" && m.departement ? `Responsable — ${m.departement}` : m.fonction}
         </div>
+        {m.telephone && (
+          <div className="flex gap-2 mt-3">
+            <a
+              href={`tel:${m.telephone.replace(/\s+/g, "")}`}
+              className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs border border-[#BFCCE6] text-[#0B3BA6] px-2 py-1.5 rounded-sm hover:border-[#0B3BA6] transition"
+            >
+              <PhoneCall size={13} /> Appeler
+            </a>
+            <a
+              href={`https://wa.me/${m.telephone.replace(/[^0-9]/g, "")}`}
+              target="_blank" rel="noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-1.5 text-xs border border-[#BFCCE6] text-[#0B3BA6] px-2 py-1.5 rounded-sm hover:border-[#0B3BA6] transition"
+            >
+              <MessageCircle size={13} /> WhatsApp
+            </a>
+          </div>
+        )}
       </div>
     </Card>
   );
@@ -1385,6 +1404,7 @@ function VueComite({ token, comite, setComite }) {
   const [nom, setNom] = useState("");
   const [fonction, setFonction] = useState(FONCTIONS_COMITE[0]);
   const [departement, setDepartement] = useState("");
+  const [telephone, setTelephone] = useState("");
   const [photo, setPhoto] = useState(null);
   const [erreur, setErreur] = useState("");
 
@@ -1397,11 +1417,11 @@ function VueComite({ token, comite, setComite }) {
   }
 
   function reinitialiserFormComite() {
-    setNom(""); setFonction(FONCTIONS_COMITE[0]); setDepartement(""); setPhoto(null); setEnEdition(null);
+    setNom(""); setFonction(FONCTIONS_COMITE[0]); setDepartement(""); setTelephone(""); setPhoto(null); setEnEdition(null);
   }
 
   function modifier(m) {
-    setNom(m.nom); setFonction(m.fonction); setDepartement(m.departement || ""); setPhoto(m.photo || null);
+    setNom(m.nom); setFonction(m.fonction); setDepartement(m.departement || ""); setTelephone(m.telephone || ""); setPhoto(m.photo || null);
     setEnEdition(m.id);
   }
 
@@ -1412,6 +1432,7 @@ function VueComite({ token, comite, setComite }) {
       nom: nom.trim(),
       fonction,
       departement: fonction === "Responsable de département" ? departement.trim() : "",
+      telephone: telephone.trim(),
       photo,
     };
     try {
@@ -1462,6 +1483,10 @@ function VueComite({ token, comite, setComite }) {
               </datalist>
             </div>
           )}
+          <div>
+            <TextField label="Téléphone (facultatif)" value={telephone} onChange={(e) => setTelephone(e.target.value)} placeholder="Ex : 229 97 00 00 00" />
+            <p className="text-xs text-[#64769A] mt-1">Avec l'indicatif du pays (229 pour le Bénin), pour que le bouton WhatsApp fonctionne.</p>
+          </div>
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-sm overflow-hidden border border-[#D3DDF0] bg-[#E4EAF6] flex items-center justify-center text-xs text-[#64769A]">
               {photo ? <img src={photo} alt="" className="w-full h-full object-cover" /> : "Photo"}
@@ -1501,7 +1526,7 @@ function VueComite({ token, comite, setComite }) {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium text-[#0B1B45] truncate">{m.nom}</div>
                   <div className="text-xs text-[#64769A]">
-                    {m.fonction}{m.departement ? ` — ${m.departement}` : ""}
+                    {m.fonction}{m.departement ? ` — ${m.departement}` : ""}{m.telephone ? ` — ${m.telephone}` : ""}
                   </div>
                 </div>
                 <button onClick={() => modifier(m)} className="text-[#64769A] hover:text-[#0B3BA6] transition shrink-0"><Pencil size={16} /></button>
